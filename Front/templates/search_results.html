@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Результаты поиска</h1>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% else %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Лот</th>
+                    <th>Модель</th>
+                    <th>Название</th>
+                    <th>Начальная ставка</th>
+                    <th>Конечная ставка</th>
+                    <th>Топливо</th>
+                    <th>Коробка</th>
+                    <th>Пробег</th>
+                    <th>Год выпуска</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    <td>{{ result.lotNumber }}</td>
+                    <td>{{ result.name }}</td>
+                    <td>{{ result.model }}</td>
+                    <td>{{ result.mileage }}</td>
+                    <td>{{ result.openingBid }} €</td>
+                    <td>{{ result.highestBidValue }} €</td>
+                    <td>{{ result.type }}</td>
+                    <td>{{ result.decision }}</td>
+                    <td>{{ result.date }}</td>
+                    <td>{{ result.room }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+</body>
+</html>

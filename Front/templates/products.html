@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" rel="stylesheet">
+    <!-- Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
+
+
+    <style>
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .card img {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .details {
+            font-size: 0.9rem;
+        }
+
+        .lot-info {
+            font-size: 0.85rem;
+            color: gray;
+        }
+
+        .price {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #007bff;
+        }
+    </style>
+
+
+
+
+</head>
+
+<body>
+    <!-- style="border: 2px solid green;""> -->
+
+    <!-- <div  -->
+    <!-- style="border: 2px solid goldenrod;"  -->
+    <!-- class="container-fluid"> -->
+    <!-- class="container col-3 mt-4 mx-4"> -->
+
+    <!-- <div class="container mt-4"> -->
+    <!-- <div class="col-12 col-sm-6 col-md-3 col-lg-3"> -->
+    <h1 class="container mt-4">
+        Лоты продажи {{ sale.id_number }} ({{ sale.room }} {{ sale.date }}) —
+        <!-- <span id="lot-count">0</span> лотов -->
+        <!-- Добавляем блок для подсчета карточек -->
+        <!-- <div class="mt-3"> -->
+        <span id="card-count">Init ...</span>
+        <!-- </div> -->
+        <!-- <button type="button" class="btn btn-secondary ml-2" id="reset-filters">Сбросить фильтры</button> -->
+    </h1>
+
+    <div class="container mt-6">
+        <form id="filter-form" class="row g-3">
+            <!-- <div class="col-md-3"> -->
+            <!-- <label for="name" class="form-label">Марка</label> -->
+            <!-- <input type="text" class="form-control" id="name" name="name" placeholder="Введите марку"> -->
+            <!-- </div> -->
+            <div class="col-md-3">
+                <!-- <label for="name" class="form-label">Марка</label> -->
+                <select id="name" name="name" class="form-control" multiple
+                    data-placeholder="Выберите модель">
+                    <option value="alfa romeo">Alfa</option>
+                    <option value="audi">Audi</option>
+                    <option value="bmw">BMW</option>
+                    <option value="fiat">Fiat</option>
+                    <option value="mercedes">Merc</option>
+                    <option value="peugeot">Peug</option>
+                    <option value="renault">Reno</option>
+                    <option value="seat">Seat</option>
+                    <option value="volkswagen">Volk</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <!-- <label for="model" class="form-label">Зал</label> -->
+                <input type="text" class="form-control" id="model" name="model" placeholder="model">
+            </div>
+            <div class="col-md-3">
+                <!-- <label for="mileage" class="form-label">Пробег</label> -->
+                <input type="number" class="form-control" id="mileage" name="mileage" placeholder="Пробег">
+            </div>
+            <div class="col-md-3">
+                <!-- <label for="price" class="form-label">Цена</label> -->
+                <input type="number" class="form-control" id="price" name="price" placeholder="Максимальная цена">
+            </div>
+            <!-- <div class="col-md-3"> -->
+            <!-- <button type="submit" class="btn btn-primary">Применить фильтры</button> -->
+            <!-- <button type="reset" class="btn btn-secondary">Сбросить</button> -->
+            <!-- </div> -->
+
+            <!-- Новые фильтры -->
+            <!-- <div class="col-md-3"> -->
+                <!-- <label for="energy" class="form-label">Энергия</label> -->
+                <!-- <input type="text" class="form-control" id="energy" name="energy" placeholder="Введите тип энергии"> -->
+            <!-- </div> -->
+            <!-- <div class="col-md-3"> -->
+                <!-- <label for="gearbox" class="form-label">Коробка</label> -->
+                <!-- <input type="text" class="form-control" id="gearbox" name="gearbox" placeholder="Введите тип коробки"> -->
+            <!-- </div> -->
+            <!-- <div class="col-md-3"> -->
+                <!-- <label for="type" class="form-label">Тип</label> -->
+                <!-- <input type="text" class="form-control" id="type" name="type" placeholder="Введите тип"> -->
+            <!-- </div> -->
+            <div class="col-md-3">
+                <!-- <label for="gearbox" class="form-label">Коробка</label> -->
+                <select id="gearbox" name="gearbox" class="form-control" multiple 
+                    data-placeholder="Выберите коробку">
+                    <option value="bva">BVA</option>
+                    <option value="bvs">BVS</option>
+                    <option value="bvm">BVM</option>
+                    <option value="vide">Не указано</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <!-- <label for="energy" class="form-label">Энергия</label> -->
+                <select id="energy" name="energy" class="form-control" multiple 
+                    data-placeholder="Выберите топливо">
+                    <option value="go">GO</option>
+                    <option value="es">ES</option>
+                    <option value="ee">EE</option>
+                    <option value="vide">Не указано</option>
+                    <option value="el">EL</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <!-- <label for="category" class="form-label">Тип</label> -->
+                <select id="category" name="category" class="form-control" multiple
+                    data-placeholder="Выберите тип">
+                    <option value="vp">VP</option>
+                    <option value="vu">VU</option>
+                    <option value="2-roues">2-roues</option>                    
+                    <option value="vide">Не указано</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="mileage_count" class="form-check-label">Повторная продажа: </label>
+                <input type="checkbox" class="form-check-input" id="mileage_count" name="mileage_count">
+            </div>
+
+            <!-- Кнопки -->
+            <div class="col-md-13">
+                <!-- <button type="submit" class="btn btn-primary">Применить фильтры</button> -->
+                <button type="reset" class="btn btn-secondary">Сбросить</button>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="row card-container mx-5 mt-4">
+        <!-- style="border: 2px solid blueviolet;"           -->
+        <!-- style="display: flex; flex-wrap: wrap;" -->
+
+        {% for product in products %}
+        <!-- <div> -->
+        <div class="col-12 col-md-4 col-lg-3 col-xl-2">
+            <!-- style="border: 2px solid orangered" -->
+            <!-- xs (extra small, <576px): контейнер занимает 100% ширины. -->
+            <!-- sm (small, ≥576px): фиксированная ширина 540px. -->
+            <!-- md (medium, ≥768px): фиксированная ширина 720px. -->
+            <!-- lg (large, ≥992px): фиксированная ширина 960px. -->
+            <!-- xl (extra large, ≥1200px): фиксированная ширина 1140px. -->
+
+            <!-- class="col-md-2"> -->
+            <!-- <div class="col-md-4"> -->
+            <!-- <div class="col-12 col-sm-6 col-md-2 col-lg-2"> -->
+
+            <div class="card" 
+                data-name="{{ product.name }}" data-model="{{ product.model }}"
+                data-mileage="{{ product.mileage }}" data-energy="{{ product.energy }}" data-category="{{ product.type }}"
+                data-rollout="{{ product.rollout }}" data-gearbox="{{ product.gearbox }}"
+                data-decision="{{ product.decision }}" data-openingBid="{{ product.openingBid }}"
+                data-highestBidValue="{{ product.highestBidValue }}" data-mileage_count="{{ product.mileage_count }}">
+                <a href="#" class="lot-link" data-lot-id="{{ product.lotId }}">
+                    <img src="{{ product.mainImgUrl }}" class="card-img-top" alt="{{ product.name }}">
+                    <!-- <img src="{{ product.mainImgUrl }}" class="card-img-top" style="width: 250px;" alt="{{ product.name }}"> -->
+                </a>
+                <!-- <img src="{{ product.mainImgUrl }}" class="card-img-top" alt="{{ product.name }}"> -->
+                <div class="card-body">
+                    <h3 class="card-title">{{ product.name }}</h3>
+                    <h5 class="card-title">{{ product.model }}</h5>
+                    <p class="details">
+                        Énergie: {{ product.energy }}  Type: {{ product.type }} <br>
+                        <a href="#" class="mileage-link" data-lot-id="{{ product.mileage }}">{{ product.mileage }}</a>
+                        <br>
+                        1ère mise: {{ product.rollout }} <br>
+                        Boîte: {{ product.gearbox }}
+                    </p>
+                    <p class="lot-info">
+                        Lot №: <strong>{{ product.lotNumber }}</strong>
+                        {% if product.decision == 'DECISION_REMOVED' %}
+                        <i class="fas fa-times-circle text-danger" title="Удалено"></i>
+                        {% elif product.decision == 'DECISION_SOLD' %}
+                        <i class="fas fa-check-circle text-success" title="Продано"></i>
+                        {% else %}
+                        <i class="fas fa-question-circle text-warning" title="Неизвестно"></i>
+                        {% endif %}
+                        <!-- Salle: {{ product.room }} <br> -->
+                        <!-- Date vente: {{ product.date }} -->
+                        {{ product.mileage_count }}
+                    </p>
+                    <p class="price">Mise à prix: {{ product.openingBid }} €
+                        -> {{ product.highestBidValue }}
+                        <!-- {% if product.decision == 'DECISION_SOLD' %} -->
+                        <!-- {% endif %} -->
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <!-- </div> -->
+
+
+    <!-- Модальное окно -->
+    <div class="modal fade" id="lotModal" tabindex="-1" role="dialog" aria-labelledby="lotModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="lotModalLabel">Информация о лоте</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalBodyContent">
+                    <!-- Здесь будет отображена информация о лоте -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+
+            // Обработчик кликов по пробегу
+            const mileageLinks = document.querySelectorAll(".mileage-link");
+            mileageLinks.forEach(link => {
+                link.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    const mileage = link.getAttribute("data-lot-id");
+                    // Перенаправляем на новую страницу с результатами поиска
+                    window.location.href = `/search-sales/${mileage}`;
+                });
+            });
+
+            // **********************************************************************
+
+            // Сохраняем изначальные карточки
+            const originalCards = Array.from(document.querySelectorAll('.card'));
+            const cardContainer = document.querySelector('.card-container');
+            const cardCount = document.getElementById('card-count'); // Элемент для отображения количества карточек
+
+            // Функция для обновления отображения карточек и подсчета
+            function updateCardCount(visibleCards) {
+                cardCount.textContent = `Всего: ${visibleCards}`;
+            }
+
+            // Устанавливаем изначальное количество карточек
+            updateCardCount(originalCards.length);
+
+            function applyFilters() {
+                const nameFilter = $('#name').val(); // Массив выбранных значений
+                const gearboxFilter = $('#gearbox').val(); // Массив выбранных значений
+                const energyFilter = $('#energy').val(); // Массив выбранных значений
+                const typeFilter = $('#category').val(); // Массив выбранных значений
+
+                const mileageFilter = parseInt(document.getElementById('mileage').value);
+                const priceFilter = parseInt(document.getElementById('price').value);
+                const modelFilter = document.getElementById('model').value.toLowerCase();
+                const mileageCountChecked = document.getElementById('mileage_count').checked;
+
+                // Очищаем контейнер
+                cardContainer.innerHTML = '';
+
+                let visibleCount = 0;
+
+                originalCards.forEach(card => {
+                    const cardName = card.dataset.name ? card.dataset.name.toLowerCase() : '';
+                    const cardMileage = card.dataset.mileage ? parseInt(card.dataset.mileage) : null;
+                    const cardPrice = card.dataset.openingbid ? parseInt(card.dataset.openingbid) : null;
+                    const cardModel = card.dataset.model ? card.dataset.model.toLowerCase() : '';
+                    const cardGearbox = card.dataset.gearbox ? card.dataset.gearbox.toLowerCase() : '';
+                    const cardEnergy = card.dataset.energy ? card.dataset.energy.toLowerCase() : '';
+                    const cardCategory = card.dataset.category ? card.dataset.category.toLowerCase() : '';
+                    const cardMileageCount = card.dataset.mileage_count ? parseInt(card.dataset.mileage_count) : 0;
+
+                    console.log("typeFilter: " + typeFilter);
+                    console.log("cardCategory: " + cardCategory);
+
+                    let isVisible = true;
+
+                    // Применяем фильтры
+                    if (nameFilter.length > 0 && !nameFilter.some(name => cardName.includes(name))) isVisible = false;
+
+                    // Обработка gearbox с учетом "vide"
+                    if (gearboxFilter.length > 0) { 
+                        const matchesGearbox = gearboxFilter.some(gearbox => 
+                            gearbox === 'vide' ? cardGearbox === '' : cardGearbox.includes(gearbox)
+                        );
+                        if (!matchesGearbox) isVisible = false;
+                    }
+
+                    // Обработка energy с учетом "vide"
+                    if (energyFilter.length > 0) {
+                        const matchesEnergy = energyFilter.some(energy => 
+                            energy === 'vide' ? cardEnergy === '' : cardEnergy.includes(energy)
+                        );
+                        if (!matchesEnergy) isVisible = false;
+                    }
+
+                    // Обработка type с учетом "vide"
+                    if (typeFilter.length > 0) {
+                        const matchesType = typeFilter.some(category => {
+                            console.log("category: '" + category + "'" + " cardCategory: '" + cardCategory + "'");
+                            category === 'vide' ? cardCategory === '' : cardCategory.includes(category);
+                            console.log("category: '" + category + "'" + " cardCategory: '" + cardCategory + "'");
+                        });
+                        if (!matchesType) isVisible = false;
+                        console.log("isVisible:" + isVisible);
+                    }
+
+                    if (mileageFilter && cardMileage && cardMileage > mileageFilter) isVisible = false;
+                    if (priceFilter && cardPrice && cardPrice > priceFilter) isVisible = false;
+                    if (modelFilter && !cardModel.includes(modelFilter)) isVisible = false;
+                    if (mileageCountChecked && cardMileageCount <= 0) isVisible = false;
+
+                    // Добавляем только подходящие карточки
+                    if (isVisible) {
+                        const colDiv = document.createElement('div');
+                        colDiv.className = card.parentElement.className; // Используем класс родителя карточки
+                        colDiv.appendChild(card);
+                        cardContainer.appendChild(colDiv);
+                        visibleCount++;
+                    }
+                });
+
+                // Обновляем отображение количества карточек
+                updateCardCount(visibleCount);
+            }
+
+
+
+
+            // function applyFilters() {
+            //     const nameFilter = $('#name').val(); // Массив выбранных значений
+            //     const gearboxFilter = $('#gearbox').val(); // Массив выбранных значений
+            //     const energyFilter = $('#energy').val(); // Массив выбранных значений
+            //     const typeFilter = $('#type').val(); // Массив выбранных значений
+
+            //     const mileageFilter = parseInt(document.getElementById('mileage').value);
+            //     const priceFilter = parseInt(document.getElementById('price').value);
+            //     const modelFilter = document.getElementById('model').value.toLowerCase();
+            //     const mileageCountChecked = document.getElementById('mileage_count').checked;
+
+            //     // Очищаем контейнер
+            //     cardContainer.innerHTML = '';
+
+            //     let visibleCount = 0;
+
+            //     originalCards.forEach(card => {
+            //         const cardName = card.dataset.name ? card.dataset.name.toLowerCase() : '';
+            //         const cardMileage = card.dataset.mileage ? parseInt(card.dataset.mileage) : null;
+            //         const cardPrice = card.dataset.openingbid ? parseInt(card.dataset.openingbid) : null;
+            //         const cardModel = card.dataset.model ? card.dataset.model.toLowerCase() : '';
+            //         const cardGearbox = card.dataset.gearbox ? card.dataset.gearbox.toLowerCase() : '';
+            //         const cardEnergy = card.dataset.energy ? card.dataset.energy.toLowerCase() : '';
+            //         const cardType = card.dataset.type ? card.dataset.type.toLowerCase() : '';
+            //         const cardMileageCount = card.dataset.mileage_count ? parseInt(card.dataset.mileage_count) : 0;
+
+            //         let isVisible = true;
+
+            //         // Применяем фильтры
+            //         if (nameFilter.length > 0 && !nameFilter.some(name => cardName.includes(name))) isVisible = false;
+            //         if (gearboxFilter.length > 0 && !gearboxFilter.some(gearbox => cardGearbox.includes(gearbox))) isVisible = false;
+            //         if (energyFilter.length > 0 && !energyFilter.some(energy => cardEnergy.includes(energy))) isVisible = false;
+            //         if (typeFilter.length > 0 && !typeFilter.some(type => cardType.includes(type))) isVisible = false;
+            //         if (mileageFilter && cardMileage && cardMileage > mileageFilter) isVisible = false;
+            //         if (priceFilter && cardPrice && cardPrice > priceFilter) isVisible = false;
+            //         if (modelFilter && !cardModel.includes(modelFilter)) isVisible = false;
+            //         if (mileageCountChecked && cardMileageCount <= 0) isVisible = false;
+
+            //         // Добавляем только подходящие карточки
+            //         if (isVisible) {
+            //             const colDiv = document.createElement('div');
+            //             colDiv.className = card.parentElement.className; // Используем класс родителя карточки
+            //             colDiv.appendChild(card);
+            //             cardContainer.appendChild(colDiv);
+            //             visibleCount++;
+            //         }
+            //     });
+
+            //     // Обновляем отображение количества карточек
+            //     updateCardCount(visibleCount);
+            // }
+
+
+            // Инициализация Select2 для name, gearbox, energy и category
+            $(document).ready(function () {
+                $('#name, #gearbox, #energy, #category').select2({
+                    // placeholder: 'Выберите значение',
+                    placeholder: function() {
+                        $(this).data('placeholder'); // Используем `data-placeholder`
+                    },
+                    allowClear: true // Разрешаем очистку выбранных значений
+                });
+
+                // Применяем фильтры при изменении выбора в Select2
+                $('#name, #gearbox, #energy, #category').on('select2:select select2:unselect', applyFilters);
+            });
+
+
+
+
+            // Привязываем событие `input` к текстовым полям и `change` к полю select
+            document.querySelectorAll('#filter-form input, #filter-form select').forEach(input => {
+                input.addEventListener('input', applyFilters); // Для текстовых и числовых полей
+                // input.addEventListener('change', applyFilters); // Для полей типа select
+            });
+
+
+            document.querySelector('#filter-form button[type="reset"]').addEventListener('click', function () {
+                // Сброс всех Select2
+                $('#name, #gearbox, #energy, #category').val(null).trigger('change');
+
+                // Очищаем контейнер карточек
+                cardContainer.innerHTML = '';
+
+                // Восстанавливаем все карточки
+                originalCards.forEach(card => {
+                    const colDiv = document.createElement('div');
+                    colDiv.className = card.parentElement.className; // Используем класс родителя карточки
+                    colDiv.appendChild(card);
+                    cardContainer.appendChild(colDiv);
+                });
+
+                // Обновляем отображение количества карточек
+                updateCardCount(originalCards.length);
+            });
+
+
+            // Инициализация при загрузке страницы
+            document.addEventListener('DOMContentLoaded', function () {
+                // Устанавливаем изначальное количество карточек
+                updateCardCount(originalCards.length);
+            });
+
+            // **********************************************************************
+
+            const lotLinks = document.querySelectorAll(".lot-link");
+            lotLinks.forEach(link => {
+                link.addEventListener("click", async (event) => {
+                    event.preventDefault();
+                    const lotId = link.getAttribute("data-lot-id");
+                    // console.log(lotId);
+
+                    // AJAX-запрос для получения данных о лоте
+                    const response = await fetch(`/lot-details/${lotId}`);
+                    const lotData = await response.json();
+                    console.log(lotData);
+
+                    // Формируем контент для модального окна
+                    const modalContent = `
+                    <div class="container-fluid">
+                        <h5 class="text-center mb-3">Детали лота</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-striped table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <th>Лот</th>
+                                            <td><a href="${lotData.detailsUrl}" target="_blank">${lotData.lotNumber}</a></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Название</th>
+                                            <td>${lotData.name}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Модель</th>
+                                            <td>${lotData.model}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Топливо</th>
+                                            <td>${lotData.energy}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Пробег</th>
+                                            <td>${lotData.mileage}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Год выпуска</th>
+                                            <td>${lotData.rollout}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="col-md-6">
+                                <table class="table table-striped table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <th>Начальная ставка</th>
+                                            <td>${lotData.openingBid} €</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Конечная ставка</th>
+                                            <td>${lotData.highestBidValue} €</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Решение</th>
+                                            <td>${lotData.decision}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Тип</th>
+                                            <td>${lotData.type}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Коробка передач</th>
+                                            <td>${lotData.gearbox}</td>
+                                        </tr>                                        
+                                        <tr>
+                                            <th>Повторный раунд</th>
+                                            <td>${lotData.extraRound ? 'Да' : 'Нет'}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Активный</th>
+                                            <td>${lotData.isActive ? 'Да' : 'Нет'}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Изображение -->
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <img src="${lotData.mainImgUrl}" class="img-fluid rounded shadow-sm" alt="Фото лота" style="max-height: 700px;">
+                            </div>
+                        </div>
+                    </div>
+                    `;
+
+
+                    // Отображаем данные в модальном окне
+                    document.getElementById("modalBodyContent").innerHTML = modalContent;
+
+                    $('#lotModal').modal('show');
+
+                    // const modal = document.getElementById('lotModal');
+                    // const modalInstance = new bootstrap.Modal(modal);
+                    // modalInstance.show();
+                });
+            });
+
+            // **********************************************************************        
+
+            // **********************************************************************        
+
+
+
+        });
+
+    </script>
+
+</body>
+
+</html>
