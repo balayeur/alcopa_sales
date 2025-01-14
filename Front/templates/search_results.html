@@ -8,7 +8,10 @@
 </head>
 <body>
 <div class="container mt-4">
-    <h1>Результаты поиска</h1>
+    
+    <h1><a href="/" class="btn btn-secondary">&lt;&lt;</a> 
+        <button class="btn btn-secondary" onclick="history.back()">&lt;</button> 
+        Результаты поиска</h1>
     {% if message %}
         <p>{{ message }}</p>
     {% else %}
