@@ -6,15 +6,17 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Получить текущий рабочий каталог
-# current_directory = os.getcwd()
+current_directory = os.getcwd()
 # Вывести текущий каталог в консоль
-current_directory = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08"
+# current_directory = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08"
+current_directory = "/Users/maximebeauger/Projects/PYTHON/alcopa_sales"
+
 print(f"Info:: Текущий каталог: {current_directory}")
 
 # DB_PATH = '/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/alcopa_sales06.db'
 # DB_PATH = 'alcopa_sales0.db'
 DB_PATH = current_directory + '/alcopa_sales.db'
-print(f"Info:: BDD каталог: {current_directory}")
+print(f"Info:: BDD path: {DB_PATH}")
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -206,4 +208,5 @@ def lot_details(lot_id):
     return jsonify(lot_data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(debug=True, port=5000)  # Укажите желаемый порт, например 5001
