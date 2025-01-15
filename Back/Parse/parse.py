@@ -12,7 +12,8 @@ directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanne
 # directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/flash"
 # directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/multilist"
 
-PATH = '/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08'
+# PATH = '/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08'
+PATH = '/Users/maximebeauger/Projects/PYTHON/alcopa_sales'
 DB_PATH = PATH + '/alcopa_sales.db'
 LOG_PATH = PATH + '/process_log.log'
 
