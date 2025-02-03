@@ -22,6 +22,8 @@
     <!-- Select2 JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scroll_button.css') }}">
+
 
     <style>
         .card {
@@ -52,6 +54,25 @@
             font-size: 1rem;
             color: #007bff;
         }
+
+
+
+        #scrollToTopButton {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #scrollToTopButton:hover {
+            background-color: #0056b3;
+        }
     </style>
 
 
@@ -60,6 +81,9 @@
 </head>
 
 <body>
+
+    <button type="button" class="btn btn-secondary" onclick="scrollToTop()" id="scrollToTopButton" title="Go to top">Top</button>
+   
     <!-- style="border: 2px solid green;""> -->
 
     <!-- <div  -->
@@ -266,6 +290,22 @@
 
 
     <script>
+        // Показываем кнопку прокрутки вверх при прокрутке страницы
+        window.onscroll = function () {
+            showScrollButton();
+        };
+        function showScrollButton() {
+            var button = document.getElementById("scrollToTopButton");
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                button.style.display = "block";
+            } else {
+                button.style.display = "none";
+            }
+        }
+        function scrollToTop() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
 
