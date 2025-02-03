@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,67 +11,106 @@
             cursor: pointer;
             text-decoration: underline;
         }
+
+        #scrollToTopButton {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #scrollToTopButton:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 
 <body>
-<div class="container-fluid" style="width: 80%; margin: 0 auto;">
-    <h1 class="mt-4">Список продаж</h1>
-    <a href="/search_all" class="btn btn-primary">Find</a>
-    <table class="table table-striped table-bordered w-80" id="salesTable">
-        <thead>
-            <tr>
-                <th class="sortable" onclick="sortTable(0)">ID</th>
-                <th class="sortable" onclick="sortTable(1)">Date</th>
-                <th class="sortable" onclick="sortTable(2)">Rom</th>
-                <th class="sortable" onclick="sortTable(3)">Corr</th>
-                <th class="sortable" onclick="sortTable(4)">End</th>
-                <th class="sortable" onclick="sortTable(5)">Info</th>
-                <th class="sortable" onclick="sortTable(6)">Name</th>
-                <th class="sortable" onclick="sortTable(7)">Type</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for sale in sales %}
-            <tr>
-                <td>{{ sale.id_number }}</td>
-                <td>{{ sale.date }}</td>
-                <td>{{ sale.room }}</td>
-                <td>{{ sale.isCorrectionMode }}</td>
-                <td>{{ sale.isEnded }}</td>
-                <td>{{ sale.infocom }}</td>
-                <td>{{ sale.title }}</td>
-                <td>{{ sale.type }}</td>
-                <td>
-                    <a href="/sales/{{ sale.id }}" class="btn btn-primary">V</a>
-                    <form action="/delete_sale/{{ sale.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-danger">X</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
 
-<script>
-function sortTable(columnIndex) {
-    const table = document.getElementById("salesTable");
-    let rows = Array.from(table.rows).slice(1);
-    const isAsc = table.getAttribute('data-sort-dir') === 'asc';
+    <button type="button" class="btn btn-secondary" onclick="scrollToTop()" id="scrollToTopButton" title="Go to top">Top</button>
+    
+    <div class="container-fluid" style="width: 80%; margin: 0 auto;">
+        <h1 class="mt-4">Список продаж</h1>
+        <a href="/search_all" class="btn btn-primary">Find</a>
+        <table class="table table-striped table-bordered w-80" id="salesTable">
+            <thead>
+                <tr>
+                    <th class="sortable" onclick="sortTable(0)">ID</th>
+                    <th class="sortable" onclick="sortTable(1)">Date</th>
+                    <th class="sortable" onclick="sortTable(2)">Rom</th>
+                    <th class="sortable" onclick="sortTable(3)">Corr</th>
+                    <th class="sortable" onclick="sortTable(4)">End</th>
+                    <th class="sortable" onclick="sortTable(5)">Info</th>
+                    <th class="sortable" onclick="sortTable(6)">Name</th>
+                    <th class="sortable" onclick="sortTable(7)">Type</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.id_number }}</td>
+                    <td>{{ sale.date }}</td>
+                    <td>{{ sale.room }}</td>
+                    <td>{{ sale.isCorrectionMode }}</td>
+                    <td>{{ sale.isEnded }}</td>
+                    <td>{{ sale.infocom }}</td>
+                    <td>{{ sale.title }}</td>
+                    <td>{{ sale.type }}</td>
+                    <td>
+                        <a href="/sales/{{ sale.id }}" class="btn btn-primary">V</a>
+                        <form action="/delete_sale/{{ sale.id }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger">X</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    rows.sort((rowA, rowB) => {
-        const cellA = rowA.cells[columnIndex].innerText;
-        const cellB = rowB.cells[columnIndex].innerText;
+    <script>
+        // Показываем кнопку прокрутки вверх при прокрутке страницы
+        window.onscroll = function () {
+            showScrollButton();
+        };
+        function showScrollButton() {
+            var button = document.getElementById("scrollToTopButton");
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                button.style.display = "block";
+            } else {
+                button.style.display = "none";
+            }
+        }
+        function scrollToTop() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
 
-        return isAsc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-    });
 
-    table.setAttribute('data-sort-dir', isAsc ? 'desc' : 'asc');
-    rows.forEach(row => table.appendChild(row));
-}
-</script>
+        function sortTable(columnIndex) {
+            const table = document.getElementById("salesTable");
+            let rows = Array.from(table.rows).slice(1);
+            const isAsc = table.getAttribute('data-sort-dir') === 'asc';
+
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.cells[columnIndex].innerText;
+                const cellB = rowB.cells[columnIndex].innerText;
+
+                return isAsc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+            });
+
+            table.setAttribute('data-sort-dir', isAsc ? 'desc' : 'asc');
+            rows.forEach(row => table.appendChild(row));
+        }
+    </script>
 
 </body>
+
 </html>
