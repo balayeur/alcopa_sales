@@ -5,23 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Список продаж</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        th.sortable:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
 <div class="container-fluid" style="width: 80%; margin: 0 auto;">
     <h1 class="mt-4">Список продаж</h1>
     <a href="/search_all" class="btn btn-primary">Find</a>
-    <table class="table table-striped table-bordered w-80">
+    <table class="table table-striped table-bordered w-80" id="salesTable">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Date</th>
-                <th>Rom</th>
-                <th>Corr</th>
-                <th>End</th>
-                <th>Info</th>
-                <th>Name</th>
-                <th>Type</th>
+                <th class="sortable" onclick="sortTable(0)">ID</th>
+                <th class="sortable" onclick="sortTable(1)">Date</th>
+                <th class="sortable" onclick="sortTable(2)">Rom</th>
+                <th class="sortable" onclick="sortTable(3)">Corr</th>
+                <th class="sortable" onclick="sortTable(4)">End</th>
+                <th class="sortable" onclick="sortTable(5)">Info</th>
+                <th class="sortable" onclick="sortTable(6)">Name</th>
+                <th class="sortable" onclick="sortTable(7)">Type</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -30,24 +36,41 @@
             <tr>
                 <td>{{ sale.id_number }}</td>
                 <td>{{ sale.date }}</td>
-                <td>{{ sale.room }}</td>
+                <td>{{ sale.room }}</td>‚
                 <td>{{ sale.isCorrectionMode }}</td>
                 <td>{{ sale.isEnded }}</td>
                 <td>{{ sale.infocom }}</td>
                 <td>{{ sale.title }}</td>
                 <td>{{ sale.type }}</td>
-
                 <td>
                     <a href="/sales/{{ sale.id }}" class="btn btn-primary">V</a>
                     <form action="/delete_sale/{{ sale.id }}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-danger">X</button>
                     </form>
                 </td>
-
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<script>
+function sortTable(columnIndex) {
+    const table = document.getElementById("salesTable");
+    let rows = Array.from(table.rows).slice(1);
+    const isAsc = table.getAttribute('data-sort-dir') === 'asc';
+
+    rows.sort((rowA, rowB) => {
+        const cellA = rowA.cells[columnIndex].innerText;
+        const cellB = rowB.cells[columnIndex].innerText;
+
+        return isAsc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+    });
+
+    table.setAttribute('data-sort-dir', isAsc ? 'desc' : 'asc');
+    rows.forEach(row => table.appendChild(row));
+}
+</script>
+
 </body>
 </html>
