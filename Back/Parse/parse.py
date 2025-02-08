@@ -183,19 +183,6 @@ def process_files_recursively(directory_path):
     conn.close()
     logging.info("Data processing completed.")
 
-# def process_files_in_directory(directory_path):
-#     conn = create_database(DB_PATH)
-
-#     for filename in os.listdir(directory_path):
-#         if filename.endswith('.html'):
-#             file_path = os.path.join(directory_path, filename)
-#             print(f"Processing file: {filename}")
-#             json_data = extract_json_from_html(file_path)
-#             if json_data:
-#                 insert_data(conn, json_data)
-
-#     conn.close()
-#     print("Data processing completed.")
 
 if __name__ == "__main__":
     # directory_path = "/path/to/html/files"
