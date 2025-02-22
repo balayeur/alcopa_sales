@@ -316,7 +316,8 @@
                     event.preventDefault();
                     const mileage = link.getAttribute("data-lot-id");
                     // Перенаправляем на новую страницу с результатами поиска
-                    window.location.href = `/search-sales/${mileage}`;
+                    // window.location.href = `/search-sales/${mileage}`;
+                    window.location.href = `/search_all/${mileage}`;
                 });
             });
 
