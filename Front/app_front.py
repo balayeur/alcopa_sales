@@ -3,6 +3,8 @@ import sqlite3
 import os
 from datetime import datetime
 
+import urllib
+
 app = Flask(__name__)
 
 # Получить текущий рабочий каталог
@@ -120,13 +122,11 @@ def search():
                     conditions.append(f"{field} = ?")
                     parameters.append(value)
 
-        
         query = """
             SELECT Product.model, Product.name, Product.mileage, Product.rollout,
-                Product.openingBid, Product.highestBidValue, Product.lotId,
-                Product.mainImgUrl, Product.detailsUrl, Product.energy,
-                Product.gearbox, Product.type, Product.decision, Sales.id_number,
-                Sales.room
+                   Product.openingBid, Product.highestBidValue, Product.mainImgUrl,
+                   Product.detailsUrl, Product.energy, Product.gearbox, Product.type, 
+                   Product.decision, Product.lotNumber, Sales.id_number, Sales.room, Sales.date
             FROM Product
             JOIN Sales ON Product.sale_id = Sales.id
 
