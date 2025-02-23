@@ -137,7 +137,69 @@ def search():
         results = conn.execute(query, parameters).fetchall()
 
     conn.close()
-    return render_template('search_all.html', filters=filters, results=results)
+    return render_template('search_all.html', filters=filters, results=results, mileage_filter=mileage_filter)
+
+
+# # страницу для поиска по всей базе данных
+# @app.route('/search_all', methods=['GET', 'POST'])
+# def search():
+#     conn = get_db_connection()
+
+#     # Извлекаем уникальные значения для выпадающих списков
+#     filters = {
+#         "energy": conn.execute("SELECT DISTINCT energy FROM Product").fetchall(),
+#         "gearbox": conn.execute("SELECT DISTINCT gearbox FROM Product").fetchall(),
+#         "type": conn.execute("SELECT DISTINCT type FROM Product").fetchall(),
+#         "decision": conn.execute("SELECT DISTINCT decision FROM Product").fetchall(),
+#         "room": conn.execute("SELECT DISTINCT room FROM Sales").fetchall(),
+#     }
+
+#     results = []
+#     if request.method == 'POST':
+#         # Читаем фильтры из запроса
+#         filters_selected = {
+#             "model": request.form.get("model"),
+#             "name": request.form.get("name"),
+#             "energy": request.form.get("energy"),
+#             "gearbox": request.form.get("gearbox"),
+#             "type": request.form.get("type"),
+#             "decision": request.form.get("decision"),
+#             "room": request.form.get("room"),
+#         }
+
+#         # Формируем SQL-запрос с динамическими условиями
+#         conditions = []
+#         parameters = []
+        
+#         for field, value in filters_selected.items():
+#             if value:
+#                 if field in ["model", "name"]:  # Поиск по текстовым полям
+#                     words = value.split()
+#                     for word in words:
+#                         conditions.append(f"{field} LIKE ?")
+#                         parameters.append(f"%{word}%")
+#                 else:  # Поиск по точному совпадению
+#                     conditions.append(f"{field} = ?")
+#                     parameters.append(value)
+
+        
+#         query = """
+#             SELECT Product.model, Product.name, Product.mileage, Product.rollout,
+#                 Product.openingBid, Product.highestBidValue, Product.lotId,
+#                 Product.mainImgUrl, Product.detailsUrl, Product.energy,
+#                 Product.gearbox, Product.type, Product.decision, Sales.id_number,
+#                 Sales.room
+#             FROM Product
+#             JOIN Sales ON Product.sale_id = Sales.id
+
+#         """
+#         if conditions:
+#             query += " WHERE " + " AND ".join(conditions)
+
+#         results = conn.execute(query, parameters).fetchall()
+
+#     conn.close()
+#     return render_template('search_all.html', filters=filters, results=results)
 
 
 # страницу для отображения найденных записей
