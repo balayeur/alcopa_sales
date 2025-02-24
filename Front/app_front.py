@@ -172,8 +172,45 @@ def search(mileage=None):
         """
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
+            
+        print(f"Info:: BDD query: {query}")
+        print(f"Info:: BDD parameters: {parameters}")
+        raw_results = conn.execute(query, parameters).fetchall()
 
-        results = conn.execute(query, parameters).fetchall()
+        # Группируем автомобили по model + name
+        for row in raw_results:
+            car_key = (row["model"], row["name"], row["mileage"], row["rollout"])
+            auction_info = {
+                "lotNumber": row["lotNumber"],
+                "openingBid": row["openingBid"],
+                "highestBidValue": row["highestBidValue"],
+                "decision": row["decision"],
+                "date": row["date"],
+                "id_number": row["id_number"],
+                "room": row["room"],
+                "sale_url": f"/auction/{row['id_number']}#lot-{row['lotNumber']}"
+            }
+
+            if car_key not in results:
+                results[car_key] = {
+                    "model": row["model"],
+                    "name": row["name"],
+                    "mileage": row["mileage"],
+                    "rollout": row["rollout"],
+                    "mainImgUrl": row["mainImgUrl"],
+                    "detailsUrl": row["detailsUrl"],
+                    "energy": row["energy"],
+                    "gearbox": row["gearbox"],
+                    "type": row["type"],
+                    "decision": row["decision"],
+                    "auctions": [auction_info]
+                }
+            else:
+                results[car_key]["auctions"].append(auction_info)
+
+        # Сортируем аукционы по убыванию даты (новые выше)
+        for car in results.values():
+            car["auctions"].sort(key=lambda x: x["date"], reverse=True)
 
     conn.close()
     return render_template('search_all.html', filters=filters, results=results, mileage_filter=mileage_filter)
