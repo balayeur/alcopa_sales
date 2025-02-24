@@ -93,24 +93,39 @@ def search(mileage=None):
 
     # Извлекаем уникальные значения для выпадающих списков
     filters = {
-        "energy": conn.execute("SELECT DISTINCT energy FROM Product").fetchall(),
-        "gearbox": conn.execute("SELECT DISTINCT gearbox FROM Product").fetchall(),
-        "type": conn.execute("SELECT DISTINCT type FROM Product").fetchall(),
-        "decision": conn.execute("SELECT DISTINCT decision FROM Product").fetchall(),
-        "room": conn.execute("SELECT DISTINCT room FROM Sales").fetchall(),
+        "energy":   [row[0] for row in conn.execute("SELECT DISTINCT energy FROM Product").fetchall()],
+        "gearbox":  [row[0] for row in conn.execute("SELECT DISTINCT gearbox FROM Product").fetchall()],
+        "type":     [row[0] for row in conn.execute("SELECT DISTINCT type FROM Product").fetchall()],
+        "decision": [row[0] for row in conn.execute("SELECT DISTINCT decision FROM Product").fetchall()],
+        "room":     [row[0] for row in conn.execute("SELECT DISTINCT room FROM Sales").fetchall()],
     }
 
-    results = []
-    if request.method == 'POST':
-        # Читаем фильтры из запроса
+    results = {}
+
+    # Очистка пробега (удаляем пробелы и "km")
+    def clean_mileage(value):
+        if value:
+            decoded_value = urllib.parse.unquote(value)  # ✅ Декодируем URL
+            return re.sub(r"[^\d]", "", decoded_value)  # Убираем все, кроме цифр
+        return None
+    
+    # Если значение mileage передано в URL, используем его
+    mileage_filter = clean_mileage(mileage)  # ✅ Очищаем пробег из URL
+
+    if request.method == 'POST' or mileage_filter:
         filters_selected = {
-            "model": request.form.get("model"),
-            "name": request.form.get("name"),
-            "energy": request.form.get("energy"),
-            "gearbox": request.form.get("gearbox"),
-            "type": request.form.get("type"),
-            "decision": request.form.get("decision"),
-            "room": request.form.get("room"),
+            "model": request.form.get("model") or None,
+            "name": request.form.get("name") or None,
+            "energy": request.form.get("energy") or None,  # ✅ Обрабатываем "Все" как None
+            "gearbox": request.form.get("gearbox") or None,
+            "type": request.form.get("type") or None,
+            "decision": request.form.get("decision") or None,
+            "room": request.form.get("room") or None,
+            "mileage_exact": mileage_filter if mileage_filter else None,
+            "mileage_min": clean_mileage(request.form.get("mileage_min")),
+            "mileage_max": clean_mileage(request.form.get("mileage_max")),
+            "rollout_min": request.form.get("rollout_min") or None,
+            "rollout_max": request.form.get("rollout_max") or None,
         }
 
         # Формируем SQL-запрос с динамическими условиями
