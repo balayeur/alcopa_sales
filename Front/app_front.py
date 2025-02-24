@@ -33,6 +33,7 @@ def index():
     sales = conn.execute("""
         SELECT id, id_number, date, isCorrectionMode, isEnded, infocom, title, type, room
         FROM Sales
+        ORDER BY date DESC
     """).fetchall()
     conn.close()
     return render_template('index.html', sales=sales)
@@ -83,8 +84,11 @@ def sale_details(sale_id):
 
 
 # страницу для поиска по всей базе данных
+# страница для поиска по всей базе данных
 @app.route('/search_all', methods=['GET', 'POST'])
 def search():
+@app.route('/search_all/<mileage>', methods=['GET', 'POST'])
+def search(mileage=None):
     conn = get_db_connection()
 
     # Извлекаем уникальные значения для выпадающих списков
