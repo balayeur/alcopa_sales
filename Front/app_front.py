@@ -85,7 +85,6 @@ def sale_details(sale_id):
 
 # страница для поиска по всей базе данных
 @app.route('/search_all', methods=['GET', 'POST'])
-def search():
 @app.route('/search_all/<mileage>', methods=['GET', 'POST'])
 def search(mileage=None):
     conn = get_db_connection()
