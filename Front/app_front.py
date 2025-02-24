@@ -135,10 +135,30 @@ def search(mileage=None):
         for field, value in filters_selected.items():
             if value:
                 if field in ["model", "name"]:  # Поиск по текстовым полям
-                    conditions.append(f"{field} LIKE ?")
-                    parameters.append(f"%{value}%")
-                else:  # Поиск по точному совпадению
-                    conditions.append(f"{field} = ?")
+                    words = value.split()
+                    for word in words:
+                        conditions.append(f"Product.{field} LIKE ?")
+                        parameters.append(f"%{word}%")                        
+                elif field == "mileage_exact":
+                    conditions.append("CAST(REPLACE(REPLACE(Product.mileage, ' ', ''), 'km', '') AS INTEGER) = ?")
+                    parameters.append(value)  # ✅ Фильтрация по точному значению
+                elif field in ["mileage_min", "mileage_max"]:  # ✅ Поиск по диапазону пробега
+                    if field == "mileage_min":
+                        conditions.append("CAST(REPLACE(REPLACE(Product.mileage, ' ', ''), 'km', '') AS INTEGER) >= ?")
+                    else:
+                        conditions.append("CAST(REPLACE(REPLACE(Product.mileage, ' ', ''), 'km', '') AS INTEGER) <= ?")
+                    parameters.append(value)
+                elif field in ["rollout_min", "rollout_max"]:
+                    if field == "rollout_min":
+                        conditions.append("Product.rollout >= ?")
+                    else:
+                        conditions.append("Product.rollout <= ?")
+                    parameters.append(value)
+                elif field == "room":  # ✅ FIX: Теперь room относится к Sales
+                    conditions.append("Sales.room = ?")
+                    parameters.append(value)
+                else:
+                    conditions.append(f"Product.{field} = ?")
                     parameters.append(value)
 
         query = """
