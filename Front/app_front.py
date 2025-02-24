@@ -1,3 +1,4 @@
+import re
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import sqlite3
 import os
@@ -82,8 +83,6 @@ def sale_details(sale_id):
     return render_template('products.html', sale=sale, products=products)
 
 
-
-# страницу для поиска по всей базе данных
 # страница для поиска по всей базе данных
 @app.route('/search_all', methods=['GET', 'POST'])
 def search():
@@ -168,7 +167,6 @@ def search(mileage=None):
                    Product.decision, Product.lotNumber, Sales.id_number, Sales.room, Sales.date
             FROM Product
             JOIN Sales ON Product.sale_id = Sales.id
-
         """
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
