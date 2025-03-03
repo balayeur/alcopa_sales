@@ -236,7 +236,8 @@
                     <h5 class="card-title">{{ product.model }}</h5>
                     <p class="details">
                         Énergie: {{ product.energy }}  Type: {{ product.type }} <br>
-                        <a href="#" class="mileage-link" data-lot-id="{{ product.mileage }}">{{ product.mileage }}</a>
+                        <a href="#" class="mileage-link" data-mileage="{{ product.mileage }}" data-rollout="{{ product.rollout }}">
+                            {{ product.mileage }}</a>
                         <br>
                         1ère mise: {{ product.rollout }} <br>
                         Boîte: {{ product.gearbox }}
@@ -314,10 +315,13 @@
             mileageLinks.forEach(link => {
                 link.addEventListener("click", (event) => {
                     event.preventDefault();
-                    const mileage = link.getAttribute("data-lot-id");
+                    console.log(link);
+                    const mileage = link.getAttribute("data-mileage");
+                    const rollout = link.getAttribute("data-rollout");
+                    console.log(mileage, rollout);
                     // Перенаправляем на новую страницу с результатами поиска
                     // window.location.href = `/search-sales/${mileage}`;
-                    window.location.href = `/search_all/${mileage}`;
+                    window.location.href = `/search_all/${mileage},${rollout}`;
                 });
             });
 
