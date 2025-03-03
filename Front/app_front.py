@@ -85,8 +85,8 @@ def sale_details(sale_id):
 
 # страница для поиска по всей базе данных
 @app.route('/search_all', methods=['GET', 'POST'])
-@app.route('/search_all/<mileage>', methods=['GET', 'POST'])
-def search(mileage=None):
+@app.route('/search_all/<mileage>,<rollout>', methods=['GET', 'POST'])
+def search(mileage=None, rollout=None):
     conn = get_db_connection()
 
     # Извлекаем уникальные значения для выпадающих списков
@@ -109,11 +109,13 @@ def search(mileage=None):
     
     # Если значение mileage передано в URL, используем его
     mileage_filter = clean_mileage(mileage)  # ✅ Очищаем пробег из URL
+    rollout_filter = rollout
 
     if request.method == 'POST' or mileage_filter:
         filters_selected = {
             "model": request.form.get("model") or None,
             "name": request.form.get("name") or None,
+            "rollout_exact": rollout_filter if rollout_filter else None,
             "energy": request.form.get("energy") or None,  # ✅ Обрабатываем "Все" как None
             "gearbox": request.form.get("gearbox") or None,
             "type": request.form.get("type") or None,
@@ -136,10 +138,15 @@ def search(mileage=None):
                     words = value.split()
                     for word in words:
                         conditions.append(f"Product.{field} LIKE ?")
-                        parameters.append(f"%{word}%")                        
+                        parameters.append(f"%{word}%")        
+
                 elif field == "mileage_exact":
                     conditions.append("CAST(REPLACE(REPLACE(Product.mileage, ' ', ''), 'km', '') AS INTEGER) = ?")
                     parameters.append(value)  # ✅ Фильтрация по точному значению
+                elif field == "rollout_exact":
+                    conditions.append("Product.rollout = ?")
+                    parameters.append(value)  # ✅ Фильтрация по точному значению
+                    
                 elif field in ["mileage_min", "mileage_max"]:  # ✅ Поиск по диапазону пробега
                     if field == "mileage_min":
                         conditions.append("CAST(REPLACE(REPLACE(Product.mileage, ' ', ''), 'km', '') AS INTEGER) >= ?")
