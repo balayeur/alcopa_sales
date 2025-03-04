@@ -67,7 +67,7 @@ def sale_details(sale_id):
                p.isActive, p.type, p.decision, p.extraRound,
                (SELECT COUNT(*) 
                 FROM Product AS other
-                WHERE other.mileage = p.mileage AND other.sale_id != ?) AS mileage_count
+                WHERE other.mileage = p.mileage AND other.rollout = p.rollout AND other.sale_id != ?) AS mileage_count
         FROM Product AS p
         WHERE p.sale_id = ?
     """, (sale_id, sale_id)).fetchall()
