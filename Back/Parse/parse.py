@@ -15,7 +15,7 @@ directory_path = "/Users/maximebeauger/Projects/PYTHON/AlcopaScrapAuto/Session/S
 
 # PATH = '/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08'
 PATH = '/Users/maximebeauger/Projects/PYTHON/alcopa_sales'
-DB_PATH = PATH + '/alcopa_sales.db'
+DB_PATH =  PATH + '/alcopa_sales.db'
 LOG_PATH = PATH + '/process_log.log'
 
 # Настройка логгера
