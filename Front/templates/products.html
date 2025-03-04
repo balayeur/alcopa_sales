@@ -256,9 +256,9 @@
                         {{ product.mileage_count }}
                     </p>
                     <p class="price">Mise à prix: {{ product.openingBid }} €
-                        -> {{ product.highestBidValue }}
-                        <!-- {% if product.decision == 'DECISION_SOLD' %} -->
-                        <!-- {% endif %} -->
+                        {% if product.decision == 'DECISION_SOLD' %}
+                            -> <span style="color: green;"> {{ product.highestBidValue }} €</span>
+                        {% endif %}
                     </p>
                 </div>
             </div>
