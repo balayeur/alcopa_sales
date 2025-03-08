@@ -27,31 +27,141 @@
 </head>
 
 <body>
-<div class="container-fluid" style="width: 80%; margin: 0 auto;">
-    <h1 class="mt-4">Поиск по базе данных</h1>
-
-    <button type="button" class="btn btn-secondary" onclick="scrollToTop()" id="scrollToTopButton" title="Go to top">Top</button>
-    
-    <form method="POST" class="mb-4">
-        <div class="row">
-            <div class="col-md-3">
-                <label for="name">Название</label>
-                <input type="text" name="name" id="name" class="form-control" placeholder="Введите название">
     <div class="container-fluid" style="width: 80%; margin: 0 auto;">
-            </div>
-            <div class="col-md-3">
-                <label for="model">Модель</label>
-                <input type="text" name="model" id="model" class="form-control" placeholder="Введите модель">
+        <h1 class="mt-4">Поиск по базе данных</h1>
 
+        <button type="button" class="btn btn-secondary" onclick="scrollToTop()" id="scrollToTopButton"
+            title="Go to top">Top</button>
+
+        <p>Всего найдено {{ results|length }} записей</p>
+
+        <form method="POST" class="mb-4" id="searchForm">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="name">Название</label>
+                    <input type="text" name="name" id="name" class="form-control" placeholder="Введите название"
+                        value="{{ request.form.get('name', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="model">Модель</label>
+                    <input type="text" name="model" id="model" class="form-control" placeholder="Введите модель"
+                        value="{{ request.form.get('model', '') }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="mileage_min">Пробег (от)</label>
+                    <input type="number" name="mileage_min" id="mileage_min" class="form-control"
+                        placeholder="Минимальный пробег" value="{{ request.form.get('mileage_min', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="mileage_max">Пробег (до)</label>
+                    <input type="number" name="mileage_max" id="mileage_max" class="form-control"
+                        placeholder="Максимальный пробег" value="{{ request.form.get('mileage_max', '') }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="rollout_min">Дата регистрации (от)</label>
+                    <input type="date" name="rollout_min" id="rollout_min" class="form-control"
+                        value="{{ request.form.get('rollout_min', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="rollout_max">Дата регистрации (до)</label>
+                    <input type="date" name="rollout_max" id="rollout_max" class="form-control"
+                        value="{{ request.form.get('rollout_max', '') }}">
+                </div>
+
+                {% for field, values in filters.items() %}
+                <div class="col-md-3">
+                    <label for="{{ field }}">{{ field|capitalize }}</label>
+                    <select name="{{ field }}" id="{{ field }}" class="form-control">
+                        <option value="">Все</option>
+                        {% for value in values %}
+                        <option value="{{ value[0] }}" {% if request.form.get(field) == value[0] %}selected{% endif %}>
+                            {{ value[0] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
             </div>
-            {% for field, values in filters.items() %}
-            <div class="col-md-3">
-                <label for="{{ field }}">{{ field|capitalize }}</label>
-                <select name="{{ field }}" id="{{ field }}" class="form-control">
-                    <option value="">Все</option>
-                    {% for value in values %}
-                    <option value="{{ value[0] }}">{{ value[0] }}</option>
+
+            <div class="mt-3">
+                <a href="/" class="btn btn-secondary">&lt;</a>
+                <button type="submit" class="btn btn-primary">Поиск</button>
+                <button type="button" class="btn btn-danger" onclick="resetForm()">Сброс</button>
+            </div>
         </form>
+
+        {% if results %}
+        <h2>Результаты поиска</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered" id="resultsTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Название</th>
+                        <!-- <th onclick="sortTable(1)">Модель</th> -->
+                        <th onclick="sortTable(1)">Пробег</th>
+                        <th onclick="sortTable(2)">Дата регистрации</th>
+                        <th onclick="sortTable(3)">Стартовая цена</th>
+                        <!-- <th onclick="sortTable(5)">Цена продажи</th>
+                        <th onclick="sortTable(6)">ID продажи</th>
+                        <th onclick="sortTable(7)">Комната</th> -->
+                        <th>Фото</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for car in results.values() %}
+                    <tr>
+                        <td>
+                            <strong>{{ car.name }}</strong><br>
+                            <span style="font-size: 14px; color: gray;">{{ car.model }}</span><br>
+                            <span style="font-size: 12px; color: darkblue;">
+                                {{ car.energy }}, {{ car.gearbox }}, {{ car.type }}, {{ car.decision }}
+                            </span>
+                        </td>
+                        <td>{{ car.mileage }}</td>
+                        <td>{{ car.rollout }}</td>
+                        <td>
+                            {% if car.mainImgUrl and car.detailsUrl %}
+                            <a href="{{ car.detailsUrl }}" target="_blank">
+                                <img src="{{ car.mainImgUrl }}" alt="Фото" style="width: 200px;">
+                            </a>
+                            {% else %}
+                            Нет изображения
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if car.auctions %}
+                            <ul style="padding-left: 0; list-style: none;">
+                                {% for auction in car.auctions %}
+                                <li>
+                                    <a href="{{ auction.sale_url }}" target="_blank">
+                                        <strong style="font-size: 16px; 
+                                            color: {{ 'red' if auction.decision == 'DECISION_REMOVED' else 'green' }}">
+                                            Lot {{ auction.lotNumber }}
+                                        </strong>
+                                    </a><br>
+                                    <span style="font-size: 12px; color: darkgreen;">
+                                        Старт: €{{ auction.openingBid }}                                                                                
+                                        {{ '| Продано: {} €'.format(auction.highestBidValue) if auction.decision == 'DECISION_SOLD' else '' }}
+                                        {{ '| ({})'.format(((auction.highestBidValue * (1 - 0.144)) - 140) | round(0) | int) if auction.room == 'INTERNET' else '' }}
+                                    </span><br>
+                                    <!-- <span
+                                        style="font-size: 12px; color: {{ 'red' if auction.decision == 'DECISION_REMOVED' else 'blue' }}">
+                                        Статус: {{ auction.decision }}
+                                    </span><br> -->
+                                    <span style="font-size: 12px; color: gray;">
+                                        {{ auction.date }} | {{ auction.id_number }} | {{ auction.room }}
+                                    </span>
+                                </li>
+                                <hr style="margin: 5px 0;">
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            Нет аукционов
+                            {% endif %}
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -60,27 +170,27 @@
         <p>Нет данных, соответствующих заданным критериям.</p>
         {% endif %}
     </div>
-    {% elif request.method == 'POST' %}
-    <p>Нет данных, соответствующих заданным критериям.</p>
-    {% endif %}
-</div>
-<script>
-    // Показываем кнопку прокрутки вверх при прокрутке страницы
-    window.onscroll = function() {
-        showScrollButton();
-    };
-    function showScrollButton() {
-        var button = document.getElementById("scrollToTopButton");
-        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-            button.style.display = "block";
-        } else {
-            button.style.display = "none";
+    <script>
+        function resetForm() {
+        document.getElementById("searchForm").reset();
+        window.location.href = window.location.pathname;  // Очищает URL и сбрасывает GET параметры
+    }
+        // Показываем кнопку прокрутки вверх при прокрутке страницы
+        window.onscroll = function () {
+            showScrollButton();
+        };
+        function showScrollButton() {
+            var button = document.getElementById("scrollToTopButton");
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                button.style.display = "block";
+            } else {
+                button.style.display = "none";
+            }
         }
-    }
-    function scrollToTop() {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-    }
+        function scrollToTop() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
 
         // Функция сортировки таблицы
         function sortTable(columnIndex) {
