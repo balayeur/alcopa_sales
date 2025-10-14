@@ -5,15 +5,24 @@ import sqlite3
 import logging
 from bs4 import BeautifulSoup
 from datetime import datetime
+import getpass
+
+USER_NAME = getpass.getuser()
+print("USER_NAME = " + USER_NAME)
+
+# 41-MBA13-2018
+# USER_NAME = "administrateur"
+# USER_NAME = "maximebeauger"
 
 # directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/sales"
-directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/dates"
+directory_path = "/Users/" + USER_NAME + "/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/dates"
 #
 # directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/flash"
 # directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/multilist"
 
-PATH = '/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08'
-DB_PATH = PATH + '/alcopa_sales.db'
+PATH = "/Users/" + USER_NAME + "/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08"
+DB_PATH = 'alcopa_sales.db'
+# DB_PATH = PATH + '/alcopa_sales.db'
 LOG_PATH = PATH + '/process_log.log'
 
 # Настройка логгера

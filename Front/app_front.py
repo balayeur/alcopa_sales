@@ -2,14 +2,18 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import sqlite3
 import os
 from datetime import datetime
+import getpass
 
 app = Flask(__name__)
+
+USER_NAME = getpass.getuser()
+print("USER_NAME = " + USER_NAME)
 
 # Получить текущий рабочий каталог
 current_directory = os.getcwd()
 # Вывести текущий каталог в консоль
 # current_directory = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08"
-current_directory = "/Users/maximebeauger/Projects/PYTHON/alcopa_sales"
+current_directory = "/Users/" + USER_NAME + "/Projects/PYTHON/alcopa_sales"
 
 print(f"Info:: Текущий каталог: {current_directory}")
 
