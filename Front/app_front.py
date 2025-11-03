@@ -19,7 +19,12 @@ print(f"Info:: Текущий каталог: {current_directory}")
 
 # DB_PATH = '/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/alcopa_sales06.db'
 # DB_PATH = 'alcopa_sales0.db'
-DB_PATH = current_directory + '/alcopa_sales.db'
+
+# DB_PATH = "/Users/dionis/Dropbox/SHARED/workspace/PYTHON/ALCOPA_common/alcopa_sales.db"
+# DB_PATH = current_directory + '/alcopa_sales.db'
+DB_PATH = current_directory + '/_Files/bdd/alcopa_sales.db'
+DB_PATH = '/Users/dionis/Project/Python/alcopa_sales/_Files/bdd/alcopa_sales.db'
+
 print(f"Info:: BDD path: {DB_PATH}")
 
 def get_db_connection():
