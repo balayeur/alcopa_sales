@@ -10,20 +10,38 @@ import getpass
 USER_NAME = getpass.getuser()
 print("USER_NAME = " + USER_NAME)
 
+# Получить текущий рабочий каталог
+current_directory = os.getcwd()
+print(f"Info:: Текущий каталог: {current_directory}")
+
 # 41-MBA13-2018
 # USER_NAME = "administrateur"
 # USER_NAME = "maximebeauger"
+# USER_NAME = "dionis"
 
-# directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/sales"
-directory_path = "/Users/" + USER_NAME + "/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/dates"
+# directory_path = "/Users/maximebeauger/Dropbox/SHARED/Project/PYTHON/LotScanner/test/alcopa_sales/sales"
+# directory_path = "/Users/" + USER_NAME + "/Dropbox/SHARED/Project/PYTHON/LotScanner/data/_voiture/alcopa original/dates"
+# directory_path = current_directory + "/_Files/Sales"
+directory_path = "/Users/dionis/Project/Python/AlcopaScrapAuto/Session/SavedPage"
+print(f"Info:: directory_path: {directory_path}")
 #
-# directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/flash"
-# directory_path = "/Users/maximebeauger/Dropbox/SHARED/workspace/PYTHON/LotScanner/data/_voiture/alcopa original/multilist"
+# directory_path = "/Users/maximebeauger/Dropbox/SHARED/Project/PYTHON/LotScanner/data/_voiture/alcopa original/flash"
+# directory_path = "/Users/maximebeauger/Dropbox/SHARED/Project/PYTHON/LotScanner/data/_voiture/alcopa original/multilist"
 
-PATH = "/Users/" + USER_NAME + "/Dropbox/SHARED/workspace/PYTHON/LotScanner/test/alcopa_sales/08"
-DB_PATH = 'alcopa_sales.db'
+# PATH = "/Users/" + USER_NAME + "/Dropbox/SHARED/Project/PYTHON/LotScanner/test/alcopa_sales/08"
+PATH = current_directory
+
+# DB_PATH = 'alcopa_sales.db'
+DB_PATH = current_directory + '/_Files/bdd/alcopa_sales.db'
+print(f"Info:: DB_PATH: {DB_PATH}")
+
 # DB_PATH = PATH + '/alcopa_sales.db'
-LOG_PATH = PATH + '/process_log.log'
+LOG_PATH = PATH + '/_Files/logs/process_log.log'
+
+# Создать файл лога, если он не существует
+if not os.path.exists(LOG_PATH):
+    with open(LOG_PATH, 'w', encoding='utf-8') as f:
+        f.write('')  # создаёт пустой файл
 
 # Настройка логгера
 logging.basicConfig(
@@ -100,7 +118,7 @@ def extract_json_from_html(file_path):
             return None
 
         json_data = json.loads(json_data_match.group(1))
-        logging.info(f"Successfully extracted JSON data from {file_path}.")
+        logging.info(f"Successfully extracted JSON data.") # from {file_path}.")
         return json_data
 
     except json.JSONDecodeError as e:
@@ -110,13 +128,34 @@ def extract_json_from_html(file_path):
         logging.error(f"Unexpected error in extract_json_from_html: {e}")
         return None    
 
-def insert_data(conn, json_data):
+def extract_date_from_filename(filename):
+    # Ищет дату в формате YYYY-MM-DD или YYYY-MM-DD HH-MM-SS в начале имени файла
+    match = re.match(r"(\d{4}-\d{2}-\d{2})(?:[ _](\d{2}-\d{2}-\d{2}))?", filename)
+    if match:
+        date_str = match.group(1)
+        return date_str
+    return None
+
+def insert_data(conn, json_data, filename=None):
     cursor = conn.cursor()
 
     try:
         sale = json_data.get('sale', {})
         sale_id_number = sale.get('id')
-        sale_date = datetime.now().strftime('%Y-%m-%d')
+
+        # Получаем дату из имени файла, если возможно
+        sale_date = None
+        if filename:
+            sale_date = extract_date_from_filename(filename)
+            if sale_date:
+                logging.info(f"Дата {sale_date} взята из имени файла.") #  : {filename}")
+            else:
+                sale_date = datetime.now().strftime('%Y-%m-%d')
+                logging.warning(f"Дата не найдена в имени файла {filename}, используется текущая: {sale_date}")
+        else:
+            sale_date = datetime.now().strftime('%Y-%m-%d')
+            logging.warning(f"Имя файла не передано, используется текущая дата: {sale_date}")
+
         sale_data = (
             sale_id_number,
             sale_date,
@@ -168,7 +207,6 @@ def insert_data(conn, json_data):
                 gearbox, isActive, type, decision, extraRound, sale_id
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, product_data)
-            # logging.info(f"Inserted product data for lot ID: {lot.get('lotId')}")
 
         conn.commit()
 
@@ -182,10 +220,11 @@ def process_files_recursively(directory_path):
         for filename in files:
             if filename.endswith('.html'):
                 file_path = os.path.join(root, filename)
-                logging.info(f"Processing file: {file_path}")
+                logging.info(f"Processing file: {filename}")
+                # logging.info(f"Processing file: {file_path}")
                 json_data = extract_json_from_html(file_path)
                 if json_data:
-                    insert_data(conn, json_data)
+                    insert_data(conn, json_data, filename=filename)
                 logging.info(f" --- ")
 
     conn.close()
