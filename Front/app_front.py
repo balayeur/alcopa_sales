@@ -40,6 +40,7 @@ def index():
     sales = conn.execute("""
         SELECT id, id_number, date, isCorrectionMode, isEnded, infocom, title, type, room
         FROM Sales
+        ORDER BY date DESC
     """).fetchall()
     conn.close()
     return render_template('index.html', sales=sales)
