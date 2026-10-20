@@ -1,8 +1,11 @@
+import re
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import sqlite3
 import os
 from datetime import datetime
 import getpass
+
+import urllib
 
 app = Flask(__name__)
 
@@ -73,7 +76,9 @@ def sale_details(sale_id):
                p.isActive, p.type, p.decision, p.extraRound,
                (SELECT COUNT(*) 
                 FROM Product AS other
-                WHERE other.mileage = p.mileage AND other.sale_id != ?) AS mileage_count
+                WHERE other.mileage = p.mileage
+                  AND other.rollout = p.rollout
+                  AND other.sale_id != ?) AS mileage_count
         FROM Product AS p
         WHERE p.sale_id = ?
     """, (sale_id, sale_id)).fetchall()
@@ -90,64 +95,202 @@ def sale_details(sale_id):
 
 
 
-# страницу для поиска по всей базе данных
+# # страницу для поиска по всей базе данных
+# @app.route('/search_all', methods=['GET', 'POST'])
+# def search():
+#     conn = get_db_connection()
+
+#     # Извлекаем уникальные значения для выпадающих списков
+#     filters = {
+#         "energy": conn.execute("SELECT DISTINCT energy FROM Product").fetchall(),
+#         "gearbox": conn.execute("SELECT DISTINCT gearbox FROM Product").fetchall(),
+#         "type": conn.execute("SELECT DISTINCT type FROM Product").fetchall(),
+#         "decision": conn.execute("SELECT DISTINCT decision FROM Product").fetchall(),
+#         "room": conn.execute("SELECT DISTINCT room FROM Sales").fetchall(),
+#     }
+
+#     results = []
+#     if request.method == 'POST':
+#         # Читаем фильтры из запроса
+#         filters_selected = {
+#             "model": request.form.get("model"),
+#             "name": request.form.get("name"),
+#             "energy": request.form.get("energy"),
+#             "gearbox": request.form.get("gearbox"),
+#             "type": request.form.get("type"),
+#             "decision": request.form.get("decision"),
+#             "room": request.form.get("room"),
+#         }
+
+#         # Формируем SQL-запрос с динамическими условиями
+#         conditions = []
+#         parameters = []
+        
+#         for field, value in filters_selected.items():
+#             if value:
+#                 if field in ["model", "name"]:  # Поиск по текстовым полям
+#                     conditions.append(f"{field} LIKE ?")
+#                     parameters.append(f"%{value}%")
+#                 else:  # Поиск по точному совпадению
+#                     conditions.append(f"{field} = ?")
+#                     parameters.append(value)
+
+        
+#         query = """
+#             SELECT Product.model, Product.name, Product.mileage, Product.rollout,
+#                 Product.openingBid, Product.highestBidValue, Product.lotId,
+#                 Product.mainImgUrl, Product.detailsUrl, Product.energy,
+#                 Product.gearbox, Product.type, Product.decision, Sales.id_number,
+#                 Sales.room
+#             FROM Product
+#             JOIN Sales ON Product.sale_id = Sales.id
+
+#         """
+#         if conditions:
+#             query += " WHERE " + " AND ".join(conditions)
+
+#         results = conn.execute(query, parameters).fetchall()
+
+#     conn.close()
+#     return render_template('search_all.html', filters=filters, results=results)
+
+
+# 🧪 Usage examples
+# Search by rollout only:
+# GET /search_all/rollout/2023-06-15
+# Search by mileage + rollout:
+# GET /search_all/150000/2022-01-01
+# Combination with form filters still works normally.
 @app.route('/search_all', methods=['GET', 'POST'])
-def search():
+@app.route('/search_all/<mileage>', methods=['GET', 'POST'])
+@app.route('/search_all/<mileage>/<rollout>', methods=['GET', 'POST'])
+@app.route('/search_all/rollout/<rollout>', methods=['GET', 'POST'])
+@app.route('/search_all/rollout/<rollout>/<mileage>', methods=['GET', 'POST'])
+def search(mileage=None, rollout=None):
     conn = get_db_connection()
 
-    # Извлекаем уникальные значения для выпадающих списков
+    # Извлекаем уникальные значения для фильтров
     filters = {
-        "energy": conn.execute("SELECT DISTINCT energy FROM Product").fetchall(),
-        "gearbox": conn.execute("SELECT DISTINCT gearbox FROM Product").fetchall(),
-        "type": conn.execute("SELECT DISTINCT type FROM Product").fetchall(),
-        "decision": conn.execute("SELECT DISTINCT decision FROM Product").fetchall(),
-        "room": conn.execute("SELECT DISTINCT room FROM Sales").fetchall(),
+        "energy": [row[0] for row in conn.execute("SELECT DISTINCT energy FROM Product").fetchall()],
+        "gearbox": [row[0] for row in conn.execute("SELECT DISTINCT gearbox FROM Product").fetchall()],
+        "type": [row[0] for row in conn.execute("SELECT DISTINCT type FROM Product").fetchall()],
+        "decision": [row[0] for row in conn.execute("SELECT DISTINCT decision FROM Product").fetchall()],
+        "room": [row[0] for row in conn.execute("SELECT DISTINCT room FROM Sales").fetchall()],
     }
 
-    results = []
-    if request.method == 'POST':
-        # Читаем фильтры из запроса
+    results = {}
+
+    # Очистка пробега (удаляем пробелы и "km")
+    def clean_mileage(value):
+        if value:
+            return re.sub(r"[^\d]", "", urllib.parse.unquote(value))
+        return None
+
+    mileage_filter = clean_mileage(mileage)
+    # rollout date passed via URL (no cleaning needed, keep raw string)
+    rollout_filter = urllib.parse.unquote(rollout) if rollout else None
+
+    if request.method == 'POST' or mileage_filter:
         filters_selected = {
-            "model": request.form.get("model"),
-            "name": request.form.get("name"),
-            "energy": request.form.get("energy"),
-            "gearbox": request.form.get("gearbox"),
-            "type": request.form.get("type"),
-            "decision": request.form.get("decision"),
-            "room": request.form.get("room"),
+            "model": request.form.get("model") or None,
+            "name": request.form.get("name") or None,
+            "energy": request.form.get("energy") or None,  # ✅ Обрабатываем "Все" как None
+            "gearbox": request.form.get("gearbox") or None,
+            "type": request.form.get("type") or None,
+            "decision": request.form.get("decision") or None,
+            "room": request.form.get("room") or None,
+            "mileage_exact": mileage_filter if mileage_filter else None,
+            "mileage_min": clean_mileage(request.form.get("mileage_min")),
+            "mileage_max": clean_mileage(request.form.get("mileage_max")),
+            "rollout_exact": rollout_filter if rollout_filter else None,
+            "rollout_min": request.form.get("rollout_min") or None,
+            "rollout_max": request.form.get("rollout_max") or None,
         }
 
-        # Формируем SQL-запрос с динамическими условиями
         conditions = []
         parameters = []
-        
+
         for field, value in filters_selected.items():
             if value:
-                if field in ["model", "name"]:  # Поиск по текстовым полям
-                    conditions.append(f"{field} LIKE ?")
+                if field in ["model", "name"]:
+                    conditions.append(f"Product.{field} LIKE ?")
                     parameters.append(f"%{value}%")
-                else:  # Поиск по точному совпадению
-                    conditions.append(f"{field} = ?")
+                elif field == "mileage_exact":
+                    conditions.append("CAST(REPLACE(REPLACE(Product.mileage, ' ', ''), 'km', '') AS INTEGER) = ?")
+                    parameters.append(value)
+                elif field in ["mileage_min", "mileage_max"]:
+                    if field == "mileage_min":
+                        conditions.append("CAST(REPLACE(REPLACE(Product.mileage, ' ', ''), 'km', '') AS INTEGER) >= ?")
+                    else:
+                        conditions.append("CAST(REPLACE(REPLACE(Product.mileage, ' ', ''), 'km', '') AS INTEGER) <= ?")
+                    parameters.append(value)
+                elif field == "rollout_exact":
+                    conditions.append("Product.rollout = ?")
+                    parameters.append(value)
+                elif field in ["rollout_min", "rollout_max"]:
+                    conditions.append(f"Product.rollout {'>=' if field == 'rollout_min' else '<='} ?")
+                    parameters.append(value)
+                elif field in ["energy", "gearbox", "type", "decision", "room"]:
+                    conditions.append(f"Product.{field} = ?")
+                    parameters.append(value)
+                else:
+                    conditions.append(f"Product.{field} = ?")
                     parameters.append(value)
 
-        
         query = """
             SELECT Product.model, Product.name, Product.mileage, Product.rollout,
-                Product.openingBid, Product.highestBidValue, Product.lotId,
-                Product.mainImgUrl, Product.detailsUrl, Product.energy,
-                Product.gearbox, Product.type, Product.decision, Sales.id_number,
-                Sales.room
+                   Product.openingBid, Product.highestBidValue, Product.mainImgUrl,
+                   Product.detailsUrl, Product.energy, Product.gearbox, Product.type, 
+                   Product.decision, Product.lotId, Sales.id_number, Sales.room, Sales.date
             FROM Product
             JOIN Sales ON Product.sale_id = Sales.id
-
         """
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
 
-        results = conn.execute(query, parameters).fetchall()
+        raw_results = conn.execute(query, parameters).fetchall()
+
+        # Группируем автомобили по mileage + rollout
+        for row in raw_results:
+            # car_key = (row["model"], row["name"])
+            # Для более точного группирования используем mileage + rollout, 
+            # так как model + name могут быть одинаковыми для разных автомобилей
+            car_key = (row["mileage"], row["rollout"])
+            auction_info = {
+                "lotNumber": row["lotId"],
+                "openingBid": row["openingBid"],
+                "highestBidValue": row["highestBidValue"],
+                "decision": row["decision"],
+                "date": row["date"],
+                "id_number": row["id_number"],
+                "room": row["room"],
+                "sale_url": f"/auction/{row['id_number']}#lot-{row['lotId']}"
+            }
+
+            if car_key not in results:
+                results[car_key] = {
+                    "model": row["model"],
+                    "name": row["name"],
+                    "mileage": row["mileage"],
+                    "rollout": row["rollout"],
+                    "mainImgUrl": row["mainImgUrl"],
+                    "detailsUrl": row["detailsUrl"],
+                    "energy": row["energy"],
+                    "gearbox": row["gearbox"],
+                    "type": row["type"],
+                    "decision": row["decision"],
+                    "auctions": [auction_info]
+                }
+            else:
+                results[car_key]["auctions"].append(auction_info)
+
+        # Сортируем аукционы по убыванию даты (новые выше)
+        for car in results.values():
+            car["auctions"].sort(key=lambda x: x["date"], reverse=True)
 
     conn.close()
-    return render_template('search_all.html', filters=filters, results=results)
+    return render_template('search_all.html', filters=filters, results=results,
+                           mileage_filter=mileage_filter, rollout_filter=rollout_filter)
 
 
 # страницу для отображения найденных записей

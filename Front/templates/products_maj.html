@@ -1,0 +1,216 @@
+<!-- Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<div class="container mt-4">
+    <form id="filter-form" class="row g-3">
+
+        <!-- BRAND -->
+        <div class="col-md-3">
+            <label class="form-label">Марка</label>
+            <select id="name" class="form-control" multiple>
+                <option value="audi">Audi</option>
+                <option value="mercedes">Mercedes</option>
+                <option value="fiat">Fiat</option>
+                <option value="alfa romeo">Alfa Romeo</option>
+                <option value="volkswagen">Volkswagen</option>
+                <option value="seat">Seat</option>
+                <option value="renault">Renault</option>
+                <option value="peugeot">Peugeot</option>
+                <option value="bmw">BMW</option>
+            </select>
+        </div>
+
+        <!-- GEARBOX -->
+        <div class="col-md-3">
+            <label class="form-label">Коробка</label>
+            <select id="gearbox" class="form-control" multiple>
+                <option value="vide">Не указано</option>
+                <option value="bva">BVA</option>
+                <option value="bvs">BVS</option>
+                <option value="bvm">BVM</option>
+            </select>
+        </div>
+
+        <!-- ENERGY -->
+        <div class="col-md-3">
+            <label class="form-label">Энергия</label>
+            <select id="energy" class="form-control" multiple>
+                <option value="vide">Не указано</option>
+                <option value="go">GO</option>
+                <option value="ess">ESS</option>
+                <option value="ehh">EHH</option>
+            </select>
+        </div>
+
+        <!-- TYPE -->
+        <div class="col-md-3">
+            <label class="form-label">Тип</label>
+            <select id="type" class="form-control" multiple>
+                <option value="vide">Не указано</option>
+                <option value="vp">VP</option>
+                <option value="vu">VU</option>
+            </select>
+        </div>
+
+        <!-- OTHER FILTERS -->
+        <div class="col-md-3">
+            <input type="number" id="mileage" class="form-control" placeholder="Макс пробег">
+        </div>
+
+        <div class="col-md-3">
+            <input type="number" id="price" class="form-control" placeholder="Макс цена">
+        </div>
+
+        <div class="col-md-3">
+            <input type="text" id="model" class="form-control" placeholder="Модель">
+        </div>
+
+        <div class="col-md-3 form-check mt-4">
+            <input type="checkbox" class="form-check-input" id="mileage_count">
+            <label class="form-check-label">Только с историей продаж</label>
+        </div>
+
+        <div class="col-md-12">
+            <button type="reset" class="btn btn-secondary">Сбросить</button>
+        </div>
+
+    </form>
+
+    <div class="mt-3">
+        <strong id="card-count"></strong>
+    </div>
+</div>
+
+<!-- CONTAINER -->
+<div class="row card-container mx-5 mt-4"></div>
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const cardContainer = document.querySelector(".card-container");
+    const originalCards = Array.from(document.querySelectorAll(".card"));
+    const cardCount = document.getElementById("card-count");
+
+    function updateCardCount(count) {
+        cardCount.textContent = `Найдено: ${count}`;
+    }
+
+    function applyFilters() {
+
+        const nameFilter = $("#name").val() || [];
+        const gearboxFilter = $("#gearbox").val() || [];
+        const energyFilter = $("#energy").val() || [];
+        const typeFilter = $("#type").val() || [];
+
+        const mileageFilter = parseInt(document.getElementById("mileage").value);
+        const priceFilter = parseInt(document.getElementById("price").value);
+        const modelFilter = document.getElementById("model").value.toLowerCase();
+        const mileageCountChecked = document.getElementById("mileage_count").checked;
+
+        cardContainer.innerHTML = "";
+
+        let visibleCount = 0;
+
+        originalCards.forEach(card => {
+
+            const cardName = (card.dataset.name || "").toLowerCase();
+            const cardGearbox = (card.dataset.gearbox || "").toLowerCase();
+            const cardEnergy = (card.dataset.energy || "").toLowerCase();
+            const cardType = (card.dataset.type || "").toLowerCase();
+            const cardMileage = parseInt(card.dataset.mileage) || 0;
+            const cardPrice = parseInt(card.dataset.openingbid) || 0;
+            const cardModel = (card.dataset.model || "").toLowerCase();
+            const cardMileageCount = parseInt(card.dataset.mileage_count) || 0;
+
+            let isVisible = true;
+
+            // OR filters
+            if (nameFilter.length && !nameFilter.some(v => cardName.includes(v))) isVisible = false;
+
+            if (gearboxFilter.length) {
+                const match = gearboxFilter.some(v =>
+                    v === "vide" ? cardGearbox === "" : cardGearbox.includes(v)
+                );
+                if (!match) isVisible = false;
+            }
+
+            if (energyFilter.length) {
+                const match = energyFilter.some(v =>
+                    v === "vide" ? cardEnergy === "" : cardEnergy.includes(v)
+                );
+                if (!match) isVisible = false;
+            }
+
+            if (typeFilter.length) {
+                const match = typeFilter.some(v =>
+                    v === "vide" ? cardType === "" : cardType.includes(v)
+                );
+                if (!match) isVisible = false;
+            }
+
+            // Numeric filters
+            if (mileageFilter && cardMileage > mileageFilter) isVisible = false;
+            if (priceFilter && cardPrice > priceFilter) isVisible = false;
+
+            if (modelFilter && !cardModel.includes(modelFilter)) isVisible = false;
+
+            if (mileageCountChecked && cardMileageCount <= 0) isVisible = false;
+
+            if (isVisible) {
+                const colDiv = document.createElement("div");
+                colDiv.className = card.parentElement.className;
+                colDiv.appendChild(card);
+                cardContainer.appendChild(colDiv);
+                visibleCount++;
+            }
+        });
+
+        updateCardCount(visibleCount);
+    }
+
+    // Init Select2
+    $("#name, #gearbox, #energy, #type").select2({
+        allowClear: true,
+        width: "100%"
+    });
+
+    $("#name, #gearbox, #energy, #type")
+        .on("select2:select select2:unselect", applyFilters);
+
+    document.querySelectorAll("#filter-form input")
+        .forEach(el => {
+            el.addEventListener("input", applyFilters);
+            el.addEventListener("change", applyFilters);
+        });
+
+    document.querySelector("#filter-form button[type='reset']")
+        .addEventListener("click", function () {
+
+            $("#name, #gearbox, #energy, #type")
+                .val(null)
+                .trigger("change");
+
+            cardContainer.innerHTML = "";
+
+            originalCards.forEach(card => {
+                const colDiv = document.createElement("div");
+                colDiv.className = card.parentElement.className;
+                colDiv.appendChild(card);
+                cardContainer.appendChild(colDiv);
+            });
+
+            updateCardCount(originalCards.length);
+        });
+
+    // Initial count
+    updateCardCount(originalCards.length);
+
+});
